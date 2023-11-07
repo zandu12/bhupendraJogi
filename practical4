@@ -1,0 +1,132 @@
+mysql> create database library;
+Query OK, 1 row affected (0.00 sec)
+
+mysql> use library;
+Database changed
+mysql> create table borrower(Rollno int(4),Name varchar(20),DateofIssue date,NameofBook 
+    -> varchar(30),Status varchar(10));
+Query OK, 0 rows affected (0.27 sec)
+
+mysql> insert into borrower values(14,'Ram','2022-09-19','Operating System');
+ERROR 1136 (21S01): Column count doesn't match value count at row 1
+mysql> insert into borrower(Rollno, Name, DateofIssue, NameofBook) values(27,'Soham','2022-07-24','Object Oriented Programming');
+Query OK, 1 row affected (0.08 sec)
+
+mysql> insert into borrower(Rollno, Name, DateofIssue, NameofBook) values(14,'Ram','2022-09-19','Operating System');
+Query OK, 1 row affected (0.05 sec)
+
+mysql> insert into borrower(Rollno, Name, DateofIssue, NameofBook) values(34,'Mohan','2022-06-12','Microprocessor');
+Query OK, 1 row affected (0.05 sec)
+
+mysql> insert into borrower(Rollno, Name, DateofIssue, NameofBook) values(48,'Om','2022-04-19','Mechanics');
+Query OK, 1 row affected (0.04 sec)
+
+mysql> select * from Borrower;
+ERROR 1146 (42S02): Table 'library.Borrower' doesn't exist
+mysql> select * from borrower;
++--------+-------+-------------+-----------------------------+--------+
+| Rollno | Name  | DateofIssue | NameofBook                  | Status |
++--------+-------+-------------+-----------------------------+--------+
+|     27 | Soham | 2022-07-24  | Object Oriented Programming | NULL   |
+|     14 | Ram   | 2022-09-19  | Operating System            | NULL   |
+|     34 | Mohan | 2022-06-12  | Microprocessor              | NULL   |
+|     48 | Om    | 2022-04-19  | Mechanics                   | NULL   |
++--------+-------+-------------+-----------------------------+--------+
+4 rows in set (0.00 sec)
+
+mysql> create table Fine(Rollno int(4),Date date,Amount int(10));
+Query OK, 0 rows affected (0.29 sec)
+
+mysql> delimiter //
+mysql> create procedure calc_fine(in r int(10),in b varchar(30))
+    -> begin
+    -> declare doi date;
+    -> declare diff int(3);
+    -> select DateofIssue into doi from borrower where Rollno=r and NameofBook=b;
+    -> select datediff(curdate(),doi) into diff;
+    -> if diff>=15 and diff<=30 then
+    -> insert into Fine values(r,curdate(),diff*5);
+    -> end if;
+    -> if diff>30 then
+    -> insert into Fine values(r,curdate(),diff*50);
+    -> end if;
+    -> end//
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> create procedure submit(in r int(2))
+    -> begin
+    -> update borrower set status='R' where Rollno=r;
+    -> delete from Fine where Rollno=r;
+    -> end//
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> call calc_fine(14,'Operating System');
+    -> exit
+    -> exit()
+    -> ex
+    -> 
+
+^C
+mysql> delimiter ;
+mysql> call calc_fine(14,'Operating System');
+Query OK, 1 row affected (0.06 sec)
+
+mysql> select * from fine;
+ERROR 1146 (42S02): Table 'library.fine' doesn't exist
+mysql> select * from Fine;
++--------+------------+--------+
+| Rollno | Date       | Amount |
++--------+------------+--------+
+|     14 | 2023-10-28 |  20200 |
++--------+------------+--------+
+1 row in set (0.00 sec)
+
+mysql> call calc_fine(27,'Object Oriented Programming');
+Query OK, 1 row affected (0.07 sec)
+
+mysql> call calc_fine(34,'Microprocessor');
+Query OK, 1 row affected (0.04 sec)
+
+mysql> call calc_fine(48,'Mechanics');
+Query OK, 1 row affected (0.04 sec)
+
+mysql> select * from fine;
+ERROR 1146 (42S02): Table 'library.fine' doesn't exist
+mysql> select * from Fine;
++--------+------------+--------+
+| Rollno | Date       | Amount |
++--------+------------+--------+
+|     14 | 2023-10-28 |  20200 |
+|     27 | 2023-10-28 |  23050 |
+|     34 | 2023-10-28 |  25150 |
+|     48 | 2023-10-28 |  27850 |
++--------+------------+--------+
+4 rows in set (0.00 sec)
+
+mysql> call submit(14);
+Query OK, 1 row affected (0.08 sec)
+
+mysql> call submit(27);
+Query OK, 1 row affected (0.08 sec)
+
+mysql> call submit(48);
+Query OK, 1 row affected (0.07 sec)
+
+mysql> call submit(34);
+Query OK, 1 row affected (0.06 sec)
+
+mysql> select * from Fine;
+Empty set (0.00 sec)
+
+mysql> select * from borrower;
++--------+-------+-------------+-----------------------------+--------+
+| Rollno | Name  | DateofIssue | NameofBook                  | Status |
++--------+-------+-------------+-----------------------------+--------+
+|     27 | Soham | 2022-07-24  | Object Oriented Programming | R      |
+|     14 | Ram   | 2022-09-19  | Operating System            | R      |
+|     34 | Mohan | 2022-06-12  | Microprocessor              | R      |
+|     48 | Om    | 2022-04-19  | Mechanics                   | R      |
++--------+-------+-------------+-----------------------------+--------+
+4 rows in set (0.00 sec)
+
+
